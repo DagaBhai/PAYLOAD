@@ -10,12 +10,14 @@ def plot_graph_n_intertation(metrics_lst,graph_metrics):
                  metric_name=metrics,
                  series=graph_metrics[metrics]
             )
-            st.write(interpretation)
+            st.write(f"### Interpretation: {interpretation}")
             if idx>1:
                 st.divider()
 
 if "Selected_metrics" in st.session_state and st.session_state["Selected_metrics"] is not None:
-    st.title("Interperation of the Metrics")
+    name=st.session_state['market_name']
+
+    st.title(f"Interperation of the Metrics for {name}")
 
     graph_selected_metrics = st.session_state["Selected_metrics"] 
     metrics_lst_of_graph = graph_selected_metrics.columns  
