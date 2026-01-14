@@ -8,14 +8,14 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
+# --- Configuration ---
+st.set_page_config(page_title="Market AI", layout="wide")
 st.title("Ask AI about your Metrics")
 
-# Constants
 APP_NAME = "market_app"
-USER_ID = "default"
-SESSION_ID = "default"
+USER_ID = "default_user"
+SESSION_ID = "default_session"
 
-# Retry configuration
 retry_config = types.HttpRetryOptions(
     attempts=5,
     exp_base=7,
@@ -23,28 +23,22 @@ retry_config = types.HttpRetryOptions(
     http_status_codes=[429, 500, 503, 504]
 )
 
-def init_agent():
-    # Retrieve metrics data from session state
+# --- Agent Factory ---
+def init_agent_components():
+    """Initializes the runner and session service."""
     metrics_data = st.session_state.get("Selected_metrics", None)
-    market_name = st.session_state.get("market_name", None)
+    market_name = st.session_state.get("market_name", "the market")
     
-    agent_description = """You are a stock market 
-    expert your job is to answer questions about the stock markets around the world only.
-    Do not talk about anything else.
-    Your primary task to understand the data give its interpretation.
-
-    Use the `google_search()` to find information about the market if it is not available in
-    the given data. when you use google tell the user that this information is from google. 
-    If you are unable to find the correct answers then say you don't know the answer.
-    """
+    agent_description = (
+        "You are a stock market expert. Your job is to answer questions "
+        "about the stock markets around the world only. Do not talk about anything else. "
+        "Your primary task is to understand the data and give its interpretation. "
+        "Use `Google Search()` for missing info and cite it. If unknown, say you don't know."
+    )
     
     if metrics_data is not None:
-        if isinstance(metrics_data, pd.DataFrame):
-             data_str = metrics_data.to_string()
-        else:
-             data_str = str(metrics_data)
-             
-        agent_description += f"\n\nHere is the financial metrics data of {market_name} you need to analyze, Please interpret this data for the user. :\n{data_str}\n\n"
+        data_str = metrics_data.to_string() if isinstance(metrics_data, pd.DataFrame) else str(metrics_data)
+        agent_description += f"\n\nMarket Data for {market_name}:\n{data_str}\n"
 
     market_agent = LlmAgent(
         name="market_expert",
@@ -60,80 +54,65 @@ def init_agent():
     runner = Runner(agent=market_agent, app_name=APP_NAME, session_service=session_service)
     return runner, session_service
 
-# Initialize runner and session service in session state
-if "runner" not in st.session_state:
-    st.session_state.runner, st.session_state.session_service = init_agent()
-
-# Initialize chat history
+# --- Chat History Management ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Optional: Add an initial greeting from the AI based on the data
     if "Selected_metrics" in st.session_state:
-         st.session_state.messages.append({"role": "assistant", "content": "I have analyzed the metrics you selected. What would you like to know?"})
+         st.session_state.messages.append({"role": "assistant", "content": "I have analyzed the metrics. What would you like to know?"})
 
-# Display chat messages from history on app rerun
+# Display existing messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Async function to run the agent
-async def run_agent_async(prompt_text: str):
-    runner_instance = st.session_state.runner
-    session_service = st.session_state.session_service
+# --- Core Async Execution ---
+async def run_agent_logic(prompt_text: str):
+    """
+    Handles session retrieval/creation and agent execution in one loop context.
+    """
+    runner_instance, session_service = init_agent_components()
     
-    # Get or create session
-    try:
+    # Robust Session Handling: Try to get, if None, then create
+    session = await session_service.get_session(
+        app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
+    )
+    
+    if session is None:
         session = await session_service.create_session(
             app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
         )
-    except:
-        session = await session_service.get_session(
-            app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
-        )
     
-    # Convert query to ADK Content format
     query = types.Content(role="user", parts=[types.Part(text=prompt_text)])
-    
-    # Collect all response parts
     response_text = ""
     
-    # Stream the agent's response
+    # Stream and aggregate response
     async for event in runner_instance.run_async(
         user_id=USER_ID, session_id=session.id, new_message=query
     ):
         if event.content and event.content.parts:
-            if event.content.parts[0].text and event.content.parts[0].text != "None":
-                response_text += event.content.parts[0].text
+            text_part = event.content.parts[0].text
+            if text_part and text_part != "None":
+                response_text += text_part
     
     return response_text
 
-# React to user input
+# --- UI Input and Interaction ---
 if prompt := st.chat_input("Ask about the metrics..."):
-    # Display user message in chat message container
     st.chat_message("user").markdown(prompt)
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # Run the agent
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             try:
-                # Get or create event loop
-                try:
-                    loop = asyncio.get_event_loop()
-                    if loop.is_closed():
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                # Use asyncio.run to ensure a fresh, isolated loop for this turn
+                answer = asyncio.run(run_agent_logic(prompt))
                 
-                # Run the async function
-                answer = loop.run_until_complete(run_agent_async(prompt))
-                
+                if not answer:
+                    answer = "The agent did not return a response."
+                    
                 st.markdown(answer)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
             except Exception as e:
-                error_msg = f"An error occurred: {e}"
+                error_msg = f"An error occurred: {str(e)}"
                 st.error(error_msg)
                 st.session_state.messages.append({"role": "assistant", "content": error_msg})

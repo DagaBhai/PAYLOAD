@@ -1,4 +1,7 @@
 import streamlit as st
+import dotenv
+
+dotenv.load_dotenv()
 
 # Set page config (only once, at the top)
 st.set_page_config(
@@ -55,16 +58,22 @@ visual_metrics_interpertation_page = st.Page(
     icon="📈"
 )
 
+ask_ai_page = st.Page(
+    "pages/ask_ai_page.py",
+    title="Stock Market Expert Chatbot",
+    icon="🤖"
+)
+
 # Group pages: create the "Reports" section header
 pages = {
-    "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page]
+    "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page, ask_ai_page]
 }
 
 # Create navigation with Home at the top + Reports section
 pg = st.navigation(
     {
         "": [home],        # Empty key = no section header, just Home at top
-        "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page]
+        "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page, ask_ai_page]
     }
 )
 
