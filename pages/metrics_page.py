@@ -45,7 +45,7 @@ if "market_ticker" in st.session_state and st.session_state["market_ticker"] is 
         
         if st.button("Interpert Using Our AI"):
             st.session_state["Selected_metrics"] = df_metrics[selected_metrics]
-            st.switch_page("pages/visual_metrics_page.py")
+            st.switch_page("pages/ask_ai_page.py")
     
     else:
         st.info("Please select at least one metric.")
