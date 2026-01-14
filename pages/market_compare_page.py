@@ -1,7 +1,7 @@
 import streamlit as st 
-import yfinance as yf
 import pandas as pd
-from currency_converter import CurrencyConverter
+import yfinance as yf
+import plotly.graph_objects as go
 from pages.tools.market import get_market_data, options_map, period_options 
 
 st.title("Market Dashboard")
@@ -20,11 +20,10 @@ with col2:
     market2 = st.selectbox("Select Market", options_map[category2].keys(), key="market2")
     period2 = st.selectbox("Select Period", period_options.keys(), key="period2")
 
-_, center, _ = st.columns((1, 0.5, 1))
-c = CurrencyConverter()
-selected_currency=None
+_, center, _ = st.columns((1, 0.5   , 1))
 with center:
     if st.button("Comparison Graphs"):
+
         ticker1 = options_map[category1][market1]
         data1 = get_market_data(ticker1, period=period_options[period1])
         ticker_obj1 = yf.Ticker(ticker1)
@@ -45,57 +44,53 @@ with center:
         st.session_state['data2'] = data2
         st.session_state['mkt2_name'] = market2
 
+st.divider()
+res_col1, res_col2 = st.columns(2)
+
 if 'currency1' in st.session_state and 'currency2' in st.session_state:
-    currency1 = st.session_state['currency1']
-    currency2 = st.session_state['currency2']
-    
-    currency_options = sorted(list(set([
-        currency1, currency2, 
-        "USD", "EUR", "GBP", "INR", "CAD", "JPY", 
-        "HKD", "CNY", "AUD", "BRL", "ZAR"
-    ])))
 
-    selected_currency = st.selectbox(
-        "Select the Currency for the chart:",
-        currency_options
-    )    
+    mkt1 = st.session_state['mkt1_name']
+    mkt2 = st.session_state['mkt2_name']
+    cur1 = st.session_state['currency1']
+    cur2 = st.session_state['currency2']
 
-    st.write(f"## Comparison in {selected_currency}")
+    df1 = st.session_state['data1'][['Close']].rename(columns={'Close': mkt1})
+    df2 = st.session_state['data2'][['Close']].rename(columns={'Close': mkt2})
 
-    try:
-        rate1 = float(c.convert(1, currency1, selected_currency))
-        rate2 = float(c.convert(1, currency2, selected_currency))
-    except:
-        rate1, rate2 = 1.0, 1.0
+    fig = go.Figure()
 
-    mode = st.selectbox(
-        "Comparison Mode",
-        [
-            "Absolute Price",
-            "Normalized (Base = 100)",
-            "Percentage Change (%)"
-        ]
+    fig.add_trace(
+        go.Scatter(
+            x=df1.index,
+            y=df1[mkt1],
+            name=f"{mkt1} ({cur1})",
+            yaxis="y1",
+            line=dict(color="#FF0000", width=2)
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df2.index,
+            y=df2[mkt2],
+            name=f"{mkt2} ({cur2})",
+            yaxis="y2",
+            line=dict(color="#FFD700", width=2)
+        )
     )
 
-    df1 = st.session_state['data1'][['Close']] * rate1
-    df2 = st.session_state['data2'][['Close']] * rate2
+    fig.update_layout(
+        title="Market Comparison",
+        xaxis=dict(title="Date"),
+        yaxis=dict(
+            title=f"{mkt1} ({cur1})",
+            side="left"
+        ),
+        yaxis2=dict(
+            title=f"{mkt2} ({cur2})",
+            overlaying="y",
+            side="right"
+        ),
+        legend=dict(x=0.01, y=0.99)
+    )
 
-    df1.columns = [st.session_state['mkt1_name']]
-    df2.columns = [st.session_state['mkt2_name']]
-
-    df_final = pd.concat([df1, df2], axis=1)
-    df_final = df_final.sort_index().ffill().bfill()
-
-    if mode == "Normalized (Base = 100)":
-        df_final = (df_final / df_final.iloc[0]) * 100
-        st.caption("Prices normalized to 100 at the starting point")
-
-    elif mode == "Percentage Change (%)":
-        df_final = df_final.pct_change() * 100
-        st.caption("Percentage change from previous period")
-
-    else:
-        st.caption(f"Absolute prices in {selected_currency}")
-
-    st.line_chart(df_final, color=["#FF0000", "#FFD700"])
-
+    st.plotly_chart(fig, use_container_width=True)
