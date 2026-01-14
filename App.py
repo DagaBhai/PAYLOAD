@@ -24,7 +24,7 @@ def home_page():
 
         if st.button("⚖️ COMPARE THE MARKETS", use_container_width=True):
             st.write("Redirecting...")
-            st.switch_page("pages/metrics_compare_page.py")
+            st.switch_page("pages/market_compare_page.py")
 
 # Define pages
 home = st.Page(
