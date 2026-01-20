@@ -52,12 +52,6 @@ Metrics = st.Page(
     icon="📈"
 )
 
-visual_metrics_interpertation_page = st.Page(
-    "pages/visual_metrics_page.py",
-    title="Visual Metrics and interpertation",
-    icon="📈"
-)
-
 ask_ai_page = st.Page(
     "pages/ask_ai_page.py",
     title="Stock Market Expert Chatbot",
@@ -66,14 +60,14 @@ ask_ai_page = st.Page(
 
 # Group pages: create the "Reports" section header
 pages = {
-    "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page, ask_ai_page]
+    "Market Report": [Chart, Chart_Compare, Metrics, ask_ai_page]
 }
 
 # Create navigation with Home at the top + Reports section
 pg = st.navigation(
     {
         "": [home],        # Empty key = no section header, just Home at top
-        "Market Report": [Chart, Chart_Compare, Metrics,visual_metrics_interpertation_page, ask_ai_page]
+        "Market Report": [Chart, Chart_Compare, Metrics, ask_ai_page]
     }
 )
 

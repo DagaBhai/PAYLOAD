@@ -92,8 +92,8 @@ def interpret_log_return(series):
         return "volatile"
     return "stable"
 
-def interpret_support(series):
-    price, support = series.iloc[-1]
+def interpret_support(series,price):
+    support = series.iloc[-1]
     dist = abs(price - support) / price
 
     if dist < 0.01:
@@ -102,8 +102,8 @@ def interpret_support(series):
         return "broken"
     return "neutral"
 
-def interpret_resistance(series):
-    price, resistance = series.iloc[-1]
+def interpret_resistance(series,price):
+    resistance = series.iloc[-1]
     dist = abs(resistance - price) / price
 
     if dist < 0.01:
@@ -224,8 +224,7 @@ FN_METRIC_MAP = {
     "Moving Average Convergence Divergence (Histogram)": interpret_macd_hist
 }
 
-
-def interpret_metric(metric_name, series):
+def interpret_metric(metric_name, series, price=0):
     fn = FN_METRIC_MAP[metric_name]
-    regime = fn(series)
+    regime = fn(series, price=0)
     return INTERPRETATIONS[metric_name][regime]
