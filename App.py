@@ -1,3 +1,7 @@
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
 import streamlit as st
 import dotenv
 
@@ -58,16 +62,26 @@ ask_ai_page = st.Page(
     icon="🤖"
 )
 
+forecasting_page = st.Page(
+    "pages/forecasting_page.py",
+    title="Forecasting",
+    icon="🔮"
+)
+
 # Group pages: create the "Reports" section header
 pages = {
-    "Market Report": [Chart, Chart_Compare, Metrics, ask_ai_page]
+    "Market Report": [Chart, Chart_Compare, Metrics],
+    "Agents Zone": [ask_ai_page],
+    "Predictions Report": [forecasting_page]
 }
 
 # Create navigation with Home at the top + Reports section
 pg = st.navigation(
     {
         "": [home],        # Empty key = no section header, just Home at top
-        "Market Report": [Chart, Chart_Compare, Metrics, ask_ai_page]
+        "Market Report": [Chart, Chart_Compare, Metrics],
+        "Agents Zone": [ask_ai_page],
+        "Predictions Report": [forecasting_page]
     }
 )
 

@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from pages.tools.Interpretation import interpret_metric
+from tools.Interpretation import interpret_metric
 
 def plot_graph_n_intertation(metrics_lst,graph_metrics):
     for idx,metrics in enumerate(metrics_lst):

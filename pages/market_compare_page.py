@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import plotly.graph_objects as go
-from pages.tools.market import get_market_data, options_map, period_options 
+from tools.market import get_market_data, options_map, period_options 
 
 st.title("Market Dashboard")
 

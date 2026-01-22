@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-from pages.tools.market import get_market_data
-from pages.tools.metrics import metrics_lst,log_ret, support_n_resistance, rolling_etx, ROC, MAS, MAD, vol, vol_ratio, MACD
-from pages.tools.Interpretation import interpret_metric
+from tools.market import get_market_data
+from tools.metrics import metrics_lst,log_ret, support_n_resistance, rolling_etx, ROC, MAS, MAD, vol, vol_ratio, MACD
+from tools.Interpretation import interpret_metric
 
 def plot_graph_n_intertation(metrics_lst,graph_metrics,market_price):
     for idx,metrics in enumerate(metrics_lst):
