@@ -64,7 +64,7 @@ if "market_ticker" in st.session_state and st.session_state["market_ticker"] is 
             st.switch_page("pages/ask_ai_page.py")
 
         st.title(f"Interperation of the Metrics for {st.session_state['market_name']}")
-        graph_selected_metrics = st.session_state["Selected_metrics"] 
+        graph_selected_metrics = df_metrics[selected_metrics]
         metrics_lst_of_graph = graph_selected_metrics.columns  
         
         plot_graph_n_intertation(metrics_lst_of_graph,graph_selected_metrics,price)

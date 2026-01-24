@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from tools.lstm_model import fullmodel
 from tools.market import get_market_data,options_map,period_options
 
@@ -23,18 +24,12 @@ max_value=14,
 value=7
 )   
 
-
 st.caption(f"Forecasting of {market_name} for **{prediction_days} days** ahead")
 
 if st.button("Run Forecast"):
     with st.spinner("Running LSTM model..."):
         data = get_market_data(ticker, period_options[period])
-        forecast = fullmodel(data)
-
+        old_data, new_data = fullmodel(data)
+        full_df = pd.concat([old_data,new_data])
     st.success("Forecast completed ✔️")
-    st.line_chart(forecast)
-
-
-
-
-    
+    st.line_chart(full_df) 

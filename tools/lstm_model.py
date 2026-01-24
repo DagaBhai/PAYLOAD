@@ -128,5 +128,5 @@ def fullmodel(data, n_days=20, window_size=3):
 
     full_df = pd.concat([original_close, future_df])
 
-    return full_df
+    return original_close, future_df
 
