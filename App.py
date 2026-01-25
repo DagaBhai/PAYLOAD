@@ -68,13 +68,6 @@ forecasting_page = st.Page(
     icon="🔮"
 )
 
-# Group pages: create the "Reports" section header
-pages = {
-    "Market Report": [Chart, Chart_Compare, Metrics],
-    "Agents Zone": [ask_ai_page],
-    "Predictions Report": [forecasting_page]
-}
-
 # Create navigation with Home at the top + Reports section
 pg = st.navigation(
     {
