@@ -87,7 +87,7 @@ INTERPRETATIONS = {
 }
 
 
-def interpret_log_return(series):
+def interpret_log_return(series,price=0):
     if series.std() > series.mean() * 3:
         return "volatile"
     return "stable"
@@ -113,7 +113,7 @@ def interpret_resistance(series,price):
     return "neutral"
 
 
-def interpret_rolling_extreme(series):
+def interpret_rolling_extreme(series,price=0):
     v = series.iloc[-1]
 
     if v >= series.max():
@@ -123,7 +123,7 @@ def interpret_rolling_extreme(series):
     return "neutral"
 
 
-def interpret_roc(roc_series):
+def interpret_roc(roc_series,price=0):
     latest = roc_series.iloc[-1]
 
     if abs(latest) > 0.08:
@@ -134,7 +134,7 @@ def interpret_roc(roc_series):
         return "negative"
     return "low"
 
-def interpret_volatility(vol_series):
+def interpret_volatility(vol_series,price=0):
     recent = vol_series.iloc[-1]
     mean = vol_series.mean()
 
@@ -144,7 +144,7 @@ def interpret_volatility(vol_series):
         return "clustered"
     return "low"
 
-def interpret_vol_ratio(vol_ratio_series):
+def interpret_vol_ratio(vol_ratio_series,price=0):
     latest = vol_ratio_series.iloc[-1]
 
     if latest > 1.5:
@@ -153,12 +153,12 @@ def interpret_vol_ratio(vol_ratio_series):
         return "contracting"
     return "neutral"
 
-def interpret_mad(mad_series):
+def interpret_mad(mad_series,price=0):
     if abs(mad_series.iloc[-1]) > mad_series.std():
         return "trend_strong"
     return "trend_weak"
 
-def interpret_mas(mas_series):
+def interpret_mas(mas_series,price=0):
     latest = mas_series.iloc[-1]
 
     if latest > 0:
@@ -167,7 +167,7 @@ def interpret_mas(mas_series):
         return "downtrend"
     return "flat"
 
-def interpret_macd(macd, signal):
+def interpret_macd(macd, signal,price=0):
     diff = macd.iloc[-1] - signal.iloc[-1]
 
     if diff > 0:
@@ -176,7 +176,7 @@ def interpret_macd(macd, signal):
         return "bearish"
     return "neutral"
 
-def interpret_macd_single(series):
+def interpret_macd_single(series,price=0):
     v = series.iloc[-1]
 
     if v > 0:
@@ -186,7 +186,7 @@ def interpret_macd_single(series):
     return "neutral"
 
 
-def interpret_macd_hist(hist):
+def interpret_macd_hist(hist,price=0):
     delta = hist.diff().iloc[-1]
 
     if delta > 0:
