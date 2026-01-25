@@ -167,12 +167,12 @@ def interpret_mas(mas_series,price=0):
         return "downtrend"
     return "flat"
 
-def interpret_macd(macd, signal,price=0):
-    diff = macd.iloc[-1] - signal.iloc[-1]
+def interpret_macd(macd_diff_series, price=0):
+    v = macd_diff_series.iloc[-1]
 
-    if diff > 0:
+    if v > 0:
         return "bullish"
-    elif diff < 0:
+    elif v < 0:
         return "bearish"
     return "neutral"
 
@@ -200,7 +200,6 @@ FN_METRIC_MAP = {
     "Log Return": interpret_log_return,
 
     "Support": interpret_support,
-
     "Resistance": interpret_resistance,
 
     "Rolling Extereme": interpret_rolling_extreme,
@@ -210,21 +209,17 @@ FN_METRIC_MAP = {
     "Rate Of Change (Monthly)": interpret_roc,
 
     "Volitility": interpret_volatility,
-
     "Volitility Ratio": interpret_vol_ratio,
 
     "Moving Average Distance": interpret_mad,
-
     "Moving Average Slope": interpret_mas,
 
     "Moving Average Convergence Divergence (MACD)": interpret_macd,
-
     "Moving Average Convergence Divergence (Single Line)": interpret_macd_single,
-
     "Moving Average Convergence Divergence (Histogram)": interpret_macd_hist
 }
 
 def interpret_metric(metric_name, series, price=0):
     fn = FN_METRIC_MAP[metric_name]
-    regime = fn(series, price=0)
+    regime = fn(series, price)
     return INTERPRETATIONS[metric_name][regime]
