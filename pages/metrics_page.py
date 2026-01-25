@@ -24,7 +24,6 @@ if "market_ticker" in st.session_state and st.session_state["market_ticker"] is 
     name = st.session_state["market_name"]
     period = st.session_state["market_period"]
     data=get_market_data(market_ticker,period=period)
-    print(data.columns)
     close=data["Close"]
     price=close.iloc[-1]
     selected_metrics = st.multiselect("Select the metrics to view:", metrics_lst, default=None, key="metric_multiselect")
