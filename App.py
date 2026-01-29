@@ -9,14 +9,14 @@ dotenv.load_dotenv()
 
 # Set page config (only once, at the top)
 st.set_page_config(
-    page_title="BEST QUANTIFIER",
+    page_title="QuantVista",
     page_icon="👋",
     layout="wide"
 )
 
 # Home page function
 def home_page():
-    st.markdown("<h1 style='text-align: center;'>Welcome to BEST QUANTIFIER! 👋</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Welcome to QuantVista! 👋</h1>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center;'>What would you like to achieve today?</h3>", unsafe_allow_html=True)
     left_co, cent_co, last_co = st.columns([1, 2, 1])
 
